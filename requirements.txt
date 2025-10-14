@@ -1,0 +1,11 @@
+Flask==2.3.3
+flask-babel==3.1.0
+gunicorn==20.1.0
+requests==2.31.0
+python-dotenv==1.0.0
+joblib==1.3.2
+pandas==2.2.2
+Pillow==10.1.0
+torch==2.2.0      # OPTIONAL: remove if you don't want to install large torch on Render
+torchvision==0.16.0  # OPTIONAL: remove if torch not used server-side
+python-3.11.6
