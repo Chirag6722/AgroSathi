@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Disease Detection - AgriAI</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body { background:#f0fdf4; font-family:"Poppins",sans-serif; }
+    .container { max-width:1000px; margin:28px auto; padding:0 16px; }
+    .card { background:#fff; border-radius:12px; padding:20px; box-shadow:0 6px 30px rgba(2,6,23,0.06); }
+    .drop-area {
+      border:2px dashed #cbd5e1; border-radius:12px; padding:28px; text-align:center;
+      transition: border-color .15s, background .15s;
+    }
+    .drop-area.dragover { border-color:#16a34a; background:#f0fdf4; }
+    .thumb { max-width:260px; max-height:260px; object-fit:cover; border-radius:8px; margin-top:12px; }
+    .result { margin-top:16px; background:#f8fafc; padding:12px; border-radius:8px; }
+    .pred-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid #eef2f7; }
+    .pred-label { display:flex; gap:8px; align-items:center; }
+    .prog { height:10px; border-radius:6px; background:#e6f4ea; overflow:hidden; width:220px; }
+    .prog > i { display:block; height:100%; background:#16a34a; width:0%; }
+    .treat { margin-top:10px; background:#fff7ed; padding:10px; border-radius:8px; border-left:4px solid #f59e0b; }
+    .btn { padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:500; }
+    .btn-primary { background:#16a34a; color:#fff; }
+    .btn-outline { background:transparent; border:1px solid #cbd5e1; color:#0f172a; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="{{ url_for('home') }}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Home</a>
+    <h1 style="margin-top:12px;color:#065f46">Disease Detection</h1>
+
+    <div class="card">
+      <p>Instantly identify plant diseases and get <strong>exact chemical treatment recommendations</strong>. 
+         Drag &amp; drop an image of a leaf or plant, or click to choose.</p>
+
+      <div id="drop" class="drop-area">
+        <div><i class="fas fa-cloud-upload-alt" style="font-size:36px;color:#94a3b8"></i></div>
+        <div style="margin-top:8px">Drop image here or <button id="browseBtn" class="btn btn-outline">Browse</button></div>
+        <div id="drop-hint" style="margin-top:8px;color:#64748b;font-size:14px">PNG / JPG / JPEG / BMP — max 8MB</div>
+        <input id="fileInput" type="file" accept="image/*" style="display:none">
+        <img id="thumb" class="thumb" style="display:none" alt="preview">
+      </div>
+
+      <div style="margin-top:12px; display:flex; gap:8px; align-items:center">
+        <button id="analyzeBtn" class="btn btn-primary" disabled>Analyze Image</button>
+        <button id="resetBtn" class="btn btn-outline">Reset</button>
+        <div id="status" style="margin-left:auto;color:#334155"></div>
+      </div>
+
+      <div id="results" class="result" style="display:none"></div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const drop = document.getElementById('drop');
+  const fileInput = document.getElementById('fileInput');
+  const browseBtn = document.getElementById('browseBtn');
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const thumb = document.getElementById('thumb');
+  const status = document.getElementById('status');
+  const results = document.getElementById('results');
+  let currentFile = null;
+
+  function setStatus(s){ status.innerText = s || ''; }
+  function showThumb(file){
+    const reader = new FileReader();
+    reader.onload = function(e){
+      thumb.src = e.target.result;
+      thumb.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function enableAnalyze(enable){
+    analyzeBtn.disabled = !enable;
+  }
+
+  // Drag & drop
+  ['dragenter','dragover'].forEach(ev => {
+    drop.addEventListener(ev, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      drop.classList.add('dragover');
+    });
+  });
+  ['dragleave','drop'].forEach(ev => {
+    drop.addEventListener(ev, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      drop.classList.remove('dragover');
+    });
+  });
+  drop.addEventListener('drop', (e) => {
+    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+    handleFile(f);
+  });
+
+  browseBtn.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+  function handleFile(file){
+    if(!file) return;
+    if(!file.type.startsWith('image/')) { setStatus('Please upload an image file'); return; }
+    if(file.size > (8 * 1024 * 1024)) { setStatus('File too large (max 8MB)'); return; }
+    currentFile = file;
+    setStatus('');
+    showThumb(file);
+    enableAnalyze(true);
+    results.style.display = 'none';
+    results.innerHTML = '';
+  }
+
+  resetBtn.addEventListener('click', () => {
+    currentFile = null;
+    fileInput.value = '';
+    thumb.style.display = 'none';
+    enableAnalyze(false);
+    results.style.display = 'none';
+    results.innerHTML = '';
+    setStatus('');
+  });
+
+  analyzeBtn.addEventListener('click', async () => {
+    if(!currentFile) return;
+    setStatus('Uploading & analyzing...');
+    analyzeBtn.disabled = true;
+
+    try {
+      const form = new FormData();
+      form.append('image', currentFile);
+      const res = await fetch('/api/detect-disease', { method:'POST', body: form });
+      const data = await res.json();
+      renderResults(data);
+      setStatus('');
+    } catch(err){
+      results.style.display = 'block';
+      results.innerHTML = `<strong>Network error:</strong> ${err.message}`;
+      setStatus('');
+    } finally {
+      analyzeBtn.disabled = false;
+    }
+  });
+
+  function renderResults(data){
+    if(data.error){
+      results.style.display = 'block';
+      results.innerHTML = `<strong style="color:#b91c1c">Error:</strong> ${data.error}`;
+      return;
+    }
+
+    let html = '';
+    const top = data.predictions && data.predictions.length ? data.predictions[0].disease : 'Unknown Disease';
+
+    // 🩺 Display detected disease name
+    html += `<div style="text-align:center;margin-bottom:10px;">
+               <h2 style="color:#065f46;font-size:22px;margin:4px 0;">🩺 Detected Disease: <span style="color:#15803d">${top}</span></h2>
+             </div>`;
+
+    if(data.image_url){
+      html += `<div style="display:flex;gap:12px;align-items:center;justify-content:center;margin-bottom:10px">
+                 <img src="${data.image_url}" style="width:140px;height:140px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb">
+               </div>`;
+    }
+
+    html += `<div style="font-weight:700;color:#065f46;font-size:18px;text-align:center;margin-bottom:8px;">AI Confidence Levels</div>`;
+    if(data.predictions && data.predictions.length){
+      for(const p of data.predictions){
+        const pct = (Number(p.probability)*100).toFixed(1);
+        const width = Math.min(100, Math.round(Number(p.probability)*100));
+        html += `<div class="pred-row"><div class="pred-label"><strong>${p.disease}</strong></div>
+                 <div style="display:flex;align-items:center;gap:8px">
+                   <div class="prog"><i style="width:${width}%;"></i></div>
+                   <div style="min-width:48px">${pct}%</div>
+                 </div></div>`;
+      }
+    }
+
+    // Chemical treatment section
+    if(data.top_solution && data.top_solution.length){
+      html += `<div class="treat">
+                 <strong style="color:#92400e">💊 Exact Chemical Treatment Plan</strong>
+                 <ul style="margin-top:8px;line-height:1.5">`;
+      for(const step of data.top_solution){
+        html += `<li>${step}</li>`;
+      }
+      html += `</ul></div>`;
+    }
+
+    results.style.display = 'block';
+    results.innerHTML = html;
+  }
+
+})();
+</script>
+</body>
+</html>

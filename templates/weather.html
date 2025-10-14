@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="{{ CURRENT_LANG or 'en' }}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Weather Forecast | AgriAI</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+
+    <style>
+      body {
+        background-color: #f8fafc;
+      }
+      .weather-card {
+        max-width: 950px;
+        margin: 60px auto;
+        background: white;
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+      .form-control:focus {
+        box-shadow: none;
+        border-color: #198754;
+      }
+      .forecast-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 12px;
+      }
+      .forecast-day {
+        background: #f9f9f9;
+        border-radius: 12px;
+        padding: 12px;
+        text-align: center;
+        transition: 0.3s ease;
+      }
+      .forecast-day:hover {
+        background: #e9f8ec;
+      }
+      .alert-badge {
+        font-weight: 600;
+        margin-right: 8px;
+      }
+      .muted-note {
+        color: #6c757d;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <a href="{{ url_for('home') }}" class="btn btn-outline-secondary mt-4">
+        ← Back to Home
+      </a>
+
+      <div class="weather-card mt-4">
+        <h3 class="text-success fw-bold mb-3">
+          <i class="fas fa-cloud-sun"></i> Weather Forecast
+        </h3>
+        <p class="text-muted mb-4">
+          Advanced weather forecasting with hyperlocal predictions to help you
+          make informed farming decisions.
+        </p>
+
+        <!-- Input -->
+        <form id="weatherForm" class="row g-3">
+          <div class="col-md-5">
+            <label class="form-label">City</label>
+            <input
+              type="text"
+              id="cityInput"
+              class="form-control"
+              placeholder="e.g., Bengaluru"
+            />
+          </div>
+          <div class="col-md-3 d-flex align-items-end">
+            <button type="button" id="getWeatherBtn" class="btn btn-success w-100">
+              <i class="fas fa-search"></i> Get Weather
+            </button>
+          </div>
+          <div class="col-md-3 d-flex align-items-end">
+            <button type="button" id="geoBtn" class="btn btn-outline-success w-100">
+              <i class="fas fa-location-arrow"></i> Use my Location
+            </button>
+          </div>
+        </form>
+
+        <div id="weatherAlerts" class="mt-4"></div>
+
+        <div id="weatherResults" class="mt-4" style="display: none">
+          <h5 class="text-success mb-3 fw-semibold">
+            <i class="fas fa-sun"></i> Current Weather
+          </h5>
+
+          <div class="row mb-4">
+            <div class="col-md-3">
+              <strong>Temperature:</strong>
+              <div id="currentTemp">-- °C</div>
+            </div>
+            <div class="col-md-3">
+              <strong>Condition:</strong>
+              <div id="currentCond">—</div>
+            </div>
+            <div class="col-md-3">
+              <strong>7-Day Rainfall:</strong>
+              <div id="rainfall">— mm</div>
+            </div>
+            <div class="col-md-3">
+              <strong>Alerts:</strong>
+              <div id="alertCount">—</div>
+            </div>
+          </div>
+
+          <h6 class="fw-semibold text-success">7-Day Forecast</h6>
+          <div class="forecast-grid mt-2" id="forecastGrid"></div>
+
+          <p class="muted-note mt-3">
+            Data from OpenWeather API. Heat, frost, and rain alerts are
+            AI-generated from forecast data.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const ALERT_THRESHOLDS = { HEAT_C: 38, COLD_C: 5, RAIN_PROB: 0.7, RAIN_MM: 10 };
+
+      async function fetchWeather(payload) {
+        try {
+          const resp = await fetch("/api/weather", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (!resp.ok) throw new Error(`Server returned ${resp.status}`);
+          const data = await resp.json();
+          renderWeather(data);
+        } catch (e) {
+          alert("Failed to fetch weather: " + e.message);
+        }
+      }
+
+      function renderWeather(data) {
+        const resDiv = document.getElementById("weatherResults");
+        resDiv.style.display = "block";
+        document.getElementById("currentTemp").textContent =
+          data.current?.temp !== undefined ? `${data.current.temp} °C` : "—";
+        document.getElementById("currentCond").textContent =
+          data.current?.weather || "—";
+        document.getElementById("rainfall").textContent =
+          data.forecast?.reduce((a, d) => a + (d.precip_mm || 0), 0).toFixed(1) +
+            " mm";
+        document.getElementById("alertCount").textContent =
+          data.alerts?.length || 0;
+
+        renderAlerts(data);
+        renderForecast(data.forecast || []);
+      }
+
+      function renderForecast(days) {
+        const grid = document.getElementById("forecastGrid");
+        grid.innerHTML = "";
+        days.forEach((d) => {
+          const date = new Date(d.date || d.dt * 1000).toLocaleDateString(
+            undefined,
+            { weekday: "short", month: "short", day: "numeric" }
+          );
+          const html = `
+            <div class="forecast-day">
+              <div class="fw-semibold">${date}</div>
+              <div class="mt-2 fs-5">${d.temp_max_c ?? d.temp_max ?? "--"}° / ${
+            d.temp_min_c ?? d.temp_min ?? "--"
+          }°</div>
+              <div class="text-muted small">${
+                d.summary || d.weather || "—"
+              }</div>
+              <div class="small mt-1">Rain: ${(d.rain_probability * 100).toFixed(
+                0
+              )}% (${d.precip_mm ?? 0} mm)</div>
+            </div>`;
+          grid.insertAdjacentHTML("beforeend", html);
+        });
+      }
+
+      function renderAlerts(data) {
+        const cont = document.getElementById("weatherAlerts");
+        cont.innerHTML = "";
+
+        const alerts = [];
+
+        // Current
+        const tcur = data.current?.temp;
+        if (tcur >= ALERT_THRESHOLDS.HEAT_C)
+          alerts.push({
+            type: "danger",
+            title: "Heat Alert",
+            msg: `Current temperature ${tcur}°C — High heat expected.`,
+          });
+        else if (tcur <= ALERT_THRESHOLDS.COLD_C)
+          alerts.push({
+            type: "warning",
+            title: "Cold Alert",
+            msg: `Current temperature ${tcur}°C — Low temperature risk.`,
+          });
+
+        // Forecast
+        data.forecast?.forEach((f) => {
+          const day = f.date || new Date(f.dt * 1000).toLocaleDateString();
+          if (f.temp_max_c >= ALERT_THRESHOLDS.HEAT_C)
+            alerts.push({
+              type: "danger",
+              title: "Heat Alert",
+              msg: `${day}: High ${f.temp_max_c}°C expected.`,
+            });
+          if (f.temp_min_c <= ALERT_THRESHOLDS.COLD_C)
+            alerts.push({
+              type: "warning",
+              title: "Frost Alert",
+              msg: `${day}: Low ${f.temp_min_c}°C — frost risk.`,
+            });
+          if (
+            f.rain_probability >= ALERT_THRESHOLDS.RAIN_PROB ||
+            f.precip_mm >= ALERT_THRESHOLDS.RAIN_MM
+          )
+            alerts.push({
+              type: "info",
+              title: "Rain Alert",
+              msg: `${day}: ${(f.rain_probability * 100).toFixed(
+                0
+              )}% chance, ${f.precip_mm ?? 0} mm rain.`,
+            });
+        });
+
+        if (alerts.length === 0) {
+          cont.innerHTML =
+            '<div class="alert alert-success">No major weather alerts for the next 7 days.</div>';
+          return;
+        }
+
+        alerts.forEach((a) => {
+          cont.insertAdjacentHTML(
+            "beforeend",
+            `<div class="alert alert-${a.type}"><strong class="alert-badge">${a.title}:</strong> ${a.msg}</div>`
+          );
+        });
+      }
+
+      // Buttons
+      document
+        .getElementById("getWeatherBtn")
+        .addEventListener("click", () => {
+          const city = document.getElementById("cityInput").value.trim();
+          if (!city) return alert("Enter a city name!");
+          fetchWeather({ city });
+        });
+
+      document.getElementById("geoBtn").addEventListener("click", () => {
+        if (!navigator.geolocation)
+          return alert("Geolocation not supported in this browser.");
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const { latitude, longitude } = pos.coords;
+            fetchWeather({ lat: latitude, lon: longitude });
+          },
+          (err) => alert("Geolocation failed: " + err.message)
+        );
+      });
+    </script>
+  </body>
+</html>

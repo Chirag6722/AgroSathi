@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Smart Crop Advisory - AgriAI</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Page-specific small tweaks to match your theme */
+    body { background: #f8f9fa; font-family: 'Inter', sans-serif; }
+    .navbar { background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
+    .advisory-wrap { max-width: 920px; margin: 2.5rem auto; }
+    .card-white {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 6px 24px rgba(12, 30, 40, 0.04);
+      padding: 1.75rem;
+    }
+    .btn-green {
+      background: #16a34a;
+      border: none;
+      color: #fff;
+    }
+    .btn-green:hover { background: #15803d; }
+    .result-panel {
+      margin-top: 1.25rem;
+      padding: 1rem;
+      border-radius: 10px;
+      background: #eafaf0;
+      border-left: 5px solid #16a34a;
+    }
+    .loader {
+      display:inline-block;
+      width:18px;height:18px;border:2px solid rgba(0,0,0,0.15);
+      border-left-color:#16a34a;border-radius:50%; animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    label.form-label { font-weight:600; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="{{ url_for('home') }}">🌱 AgroSathi</a>
+      <div class="ms-auto">
+        <a class="btn btn-outline-secondary" href="{{ url_for('home') }}">← Back to Home</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="advisory-wrap container">
+    <div class="card-white">
+      <h2 class="text-success mb-1">Smart Crop Advisory</h2>
+      <p class="text-muted mb-3">Enter local soil & climate details and our AI will recommend the most suitable crops.</p>
+
+      <!-- Form -->
+      <form id="crop-form" class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="soil">Soil Type</label>
+          <select id="soil" class="form-select" required>
+            <option value="">-- Select soil type --</option>
+            <option value="loamy">Loamy</option>
+            <option value="clayey">Clayey</option>
+            <option value="sandy">Sandy</option>
+            <option value="black">Black</option>
+            <option value="red">Red</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label" for="season">Season</label>
+          <select id="season" class="form-select" required>
+            <option value="">-- Select season --</option>
+            <option value="monsoon">Monsoon</option>
+            <option value="summer">Summer</option>
+            <option value="winter">Winter</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="temp">Avg Temperature (°C)</label>
+          <input id="temp" type="number" step="0.1" min="-10" max="60" class="form-control" placeholder="e.g., 27" required>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="ph">Soil pH</label>
+          <input id="ph" type="number" step="0.1" min="3.0" max="9.0" class="form-control" placeholder="e.g., 6.5" required>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="rainfall">Rainfall (mm)</label>
+          <input id="rainfall" type="number" step="1" min="0" class="form-control" placeholder="e.g., 800" required>
+        </div>
+
+        <div class="col-12 d-flex gap-2 mt-2">
+          <button type="submit" id="submit-btn" class="btn btn-green">Get Recommendations</button>
+          <button type="button" id="reset-btn" class="btn btn-outline-secondary">Reset</button>
+          <div id="status" class="ms-auto align-self-center" style="min-width:120px;text-align:right;color:#374151"></div>
+        </div>
+      </form>
+
+      <!-- Result -->
+      <div id="result" class="d-none">
+        <!-- populated by JS -->
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const form = document.getElementById('crop-form');
+  const resultDiv = document.getElementById('result');
+  const status = document.getElementById('status');
+  const submitBtn = document.getElementById('submit-btn');
+  const resetBtn = document.getElementById('reset-btn');
+
+  resetBtn.addEventListener('click', () => {
+    form.reset();
+    resultDiv.classList.add('d-none');
+    resultDiv.innerHTML = '';
+    status.innerHTML = '';
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    resultDiv.classList.add('d-none');
+    resultDiv.innerHTML = '';
+    status.innerHTML = '<span class="loader"></span> Fetching recommendations...';
+    submitBtn.disabled = true;
+
+    const payload = {
+      soil: document.getElementById('soil').value,
+      temp: parseFloat(document.getElementById('temp').value),
+      ph: parseFloat(document.getElementById('ph').value),
+      season: document.getElementById('season').value,
+      rainfall: parseFloat(document.getElementById('rainfall').value)
+    };
+
+    // basic client-side validation
+    for (const k of ['soil','season']) {
+      if (!payload[k]) {
+        status.innerHTML = 'Please select soil and season.';
+        submitBtn.disabled = false;
+        return;
+      }
+    }
+
+    try {
+      const res = await fetch('/api/crop-advisory', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(()=>({error:'Unknown error'}));
+        status.innerHTML = `<span style="color:#b91c1c">Error: ${err.error || 'Unable to fetch'}</span>`;
+        submitBtn.disabled = false;
+        return;
+      }
+
+      const data = await res.json();
+      status.innerHTML = '';
+      submitBtn.disabled = false;
+
+      // build result UI
+      if (!data.predictions || data.predictions.length === 0) {
+        resultDiv.classList.remove('d-none');
+        resultDiv.innerHTML = `<div class="result-panel"><strong>No recommendations returned.</strong></div>`;
+        return;
+      }
+
+      const list = data.predictions.map(p => {
+        const pct = (Number(p.probability) * 100).toFixed(1);
+        return `<li class="mb-1"><strong>${p.crop}</strong> — ${pct}%</li>`;
+      }).join('');
+
+      const note = data.note ? `<div class="text-muted small mt-2">${data.note}</div>` : '';
+
+      resultDiv.classList.remove('d-none');
+      resultDiv.innerHTML = `
+        <div class="result-panel">
+          <h5 class="mb-2 text-success">🌱 Recommended crops</h5>
+          <ul class="mb-2" style="margin-left:1rem">${list}</ul>
+          ${note}
+        </div>
+      `;
+
+      // scroll to results on small screens
+      resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    } catch (err) {
+      status.innerHTML = `<span style="color:#b91c1c">Error: ${err.message || 'Network error'}</span>`;
+      submitBtn.disabled = false;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

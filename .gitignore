@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+
+# Virtual env
+venv/
+env/
+.venv/
+
+# IDEs
+.vscode/
+.idea/
+
+# Data / uploads / models
+uploads/
+models/
+*.h5
+*.pth
+*.joblib
+
+# Secrets
+.env
+
+# OS
+.DS_Store
+Thumbs.db

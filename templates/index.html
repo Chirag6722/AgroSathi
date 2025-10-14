@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="{{ CURRENT_LANG or 'en' }}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AgroSathi - AI-Powered Agriculture Solutions</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Small styling for language selector only (non-invasive) -->
+  <style>
+    .language-selector { position: relative; display:inline-block; }
+    .language-btn {
+      display:flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:8px; border:1px solid #e6e9ee;
+      background:#fff; cursor:pointer; font-family: inherit;
+    }
+    .language-dropdown {
+      position:absolute; right:0; top:calc(100% + 8px);
+      background:#fff; border:1px solid #e6e9ee; border-radius:8px;
+      box-shadow:0 6px 20px rgba(2,6,23,0.08); z-index:1000; min-width:180px;
+      overflow:hidden; display:none;
+    }
+    .language-option {
+      display:flex; align-items:center; gap:10px; width:100%;
+      padding:8px 12px; border:0; background:transparent; text-align:left;
+      cursor:pointer; font-family: inherit;
+    }
+    .language-option:hover { background:#f1f5f9; }
+    .language-flag { font-size:18px; width:28px; text-align:center; }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="header" id="header">
+    <div class="container">
+      <nav class="nav">
+        <div class="nav-brand">
+          <span class="logo">🌱 AgroSathi</span>
+        </div>
+
+        <div class="nav-menu" id="nav-menu">
+          <a href="#home" class="nav-link">Home</a>
+          <a href="#features" class="nav-link">Features</a>
+          <a href="#services" class="nav-link">Services</a>
+          <a href="#testimonials" class="nav-link">Testimonials</a>
+          <a href="#contact" class="nav-link">Contact</a>
+        </div>
+
+        <div class="nav-actions">
+          <div class="language-selector" id="language-selector">
+            <!-- single span (keeps your original look) -->
+            <button class="language-btn" id="language-btn" aria-haspopup="true" aria-expanded="false" type="button">
+              <span id="current-language">🇺🇸 EN</span>
+              <i class="fas fa-chevron-down" style="margin-left:6px"></i>
+            </button>
+
+            <div class="language-dropdown" id="language-dropdown" role="menu" aria-label="Language selection">
+              <!-- Keep these in sync with your Flask LANGUAGES if needed -->
+              <button class="language-option" data-lang="en" type="button"><span class="language-flag">🇺🇸</span> English</button>
+              <button class="language-option" data-lang="hi" type="button"><span class="language-flag">🇮🇳</span> हिन्दी</button>
+              <button class="language-option" data-lang="kn" type="button"><span class="language-flag">🇮🇳</span> ಕನ್ನಡ</button>
+              <button class="language-option" data-lang="es" type="button"><span class="language-flag">🇪🇸</span> Español</button>
+              <button class="language-option" data-lang="fr" type="button"><span class="language-flag">🇫🇷</span> Français</button>
+              <button class="language-option" data-lang="pt" type="button"><span class="language-flag">🇧🇷</span> Português</button>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" data-key="nav.getStarted">Get Started</button>
+          <button class="mobile-menu-btn" id="mobile-menu-btn">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+      <div class="container">
+        <div class="hero-content">
+          <div class="hero-text">
+            <div class="hero-badge">
+              <span data-key="hero.badge">🚀 Revolutionary AI Technology</span>
+            </div>
+            <h1 class="hero-title" data-key="hero.title">Farming intelligence for a sustainable future  </h1>
+            <p class="hero-description" data-key="hero.description">
+              Boost crop yields by 45% with our intelligent farming solutions.
+              Get personalized recommendations, early disease detection, and optimize your resources with cutting-edge AI.
+            </p>
+            <div class="hero-actions">
+              <button class="btn btn-primary btn-lg" data-key="hero.primaryCTA">Start Free Trial</button>
+              <button class="btn btn-secondary btn-lg" data-key="hero.secondaryCTA">
+                <i class="fas fa-play"></i> Watch Demo
+              </button>
+            </div>
+
+            <div class="hero-features">
+              <div class="feature-item">
+                <i class="fas fa-shield-alt"></i>
+                <span data-key="hero.feature1">Free 30-day trial</span>
+              </div>
+              <div class="feature-item">
+                <i class="fas fa-users"></i>
+                <span data-key="hero.feature2">500K+ farmers trust us</span>
+              </div>
+              <div class="feature-item">
+                <i class="fas fa-headset"></i>
+                <span data-key="hero.feature3">24/7 expert support</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-image">
+            <img src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=1080&q=80" alt="Smart farming technology" class="hero-img">
+            <div class="floating-card card-1">
+              <div class="card-icon">📊</div>
+              <div class="card-content">
+                <h4 data-key="hero.card1.title">45% Yield Increase</h4>
+                <p data-key="hero.card1.description">Average improvement with AI</p>
+              </div>
+            </div>
+            <div class="floating-card card-2">
+              <div class="card-icon">🌿</div>
+              <div class="card-content">
+                <h4 data-key="hero.card2.title">95% Accuracy</h4>
+                <p data-key="hero.card2.description">Disease detection rate</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-section">
+          <div class="stat-item">
+            <div class="stat-number">500K+</div>
+            <div class="stat-label" data-key="hero.stats.farmers">Active Farmers</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">150+</div>
+            <div class="stat-label" data-key="hero.stats.countries">Countries Served</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">45%</div>
+            <div class="stat-label" data-key="hero.stats.increase">Avg. Yield Increase</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">98%</div>
+            <div class="stat-label" data-key="hero.stats.satisfaction">Satisfaction Rate</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title" data-key="features.title">Intelligent Features for Modern Farming</h2>
+          <p class="section-description" data-key="features.subtitle">
+            Discover how our AI-powered platform revolutionizes every aspect of your agricultural operations
+          </p>
+        </div>
+
+        <div class="features-grid">
+
+          <!-- Smart Crop Advisory (clickable) -->
+          <div class="feature-card"
+               onclick="window.location.href='{{ url_for('smart_advisory') }}'"
+               role="link"
+               tabindex="0"
+               onkeydown="if(event.key==='Enter' || event.key===' ') window.location.href='{{ url_for('smart_advisory') }}';"
+               style="cursor:pointer;">
+            <div class="feature-icon"><i class="fas fa-brain"></i></div>
+            <h3 data-key="features.smartAdvisory.title">Smart Crop Advisory</h3>
+            <p data-key="features.smartAdvisory.description">
+              Get personalized recommendations for planting, irrigation, and harvesting based on AI analysis of weather, soil, and crop data.
+            </p>
+            <ul class="feature-list">
+              <li data-key="features.smartAdvisory.feature1">Optimal planting schedules</li>
+              <li data-key="features.smartAdvisory.feature2">Water management</li>
+              <li data-key="features.smartAdvisory.feature3">Harvest timing</li>
+            </ul>
+          </div>
+
+          <!-- Disease Detection -->
+          <div class="feature-card"
+     onclick="window.location.href='{{ url_for('disease_detection_page') }}'"
+     role="link"
+     tabindex="0"
+     onkeydown="if(event.key==='Enter'||event.key===' ') window.location.href='{{ url_for('disease_detection_page') }}';"
+     style="cursor:pointer;">
+  <div class="feature-icon"><i class="fas fa-camera"></i></div>
+  <h3>Disease Detection</h3>
+  <p>Instantly identify plant diseases and pest infestations using advanced computer vision and machine learning algorithms.</p>
+  <ul class="feature-list">
+    <li>Real-time scanning</li>
+    <li>95% accuracy rate</li>
+    <li>Treatment recommendations</li>
+  </ul>
+</div>
+
+<!-- Soil Analysis (clickable) -->
+<div class="feature-card"
+     onclick="window.location.href='{{ url_for('soil_analysis_page') }}'"
+     role="link"
+     tabindex="0"
+     onkeydown="if(event.key==='Enter' || event.key===' ') window.location.href='{{ url_for('soil_analysis_page') }}';"
+     style="cursor:pointer;">
+  <div class="feature-icon"><i class="fas fa-vial"></i></div>
+  <h3 data-key="features.soilAnalysis.title">Soil Analysis</h3>
+  <p data-key="features.soilAnalysis.description">
+    Comprehensive soil health monitoring with detailed nutrient analysis and customized fertilizer recommendations.
+  </p>
+  <ul class="feature-list">
+    <li data-key="features.soilAnalysis.feature1">Nutrient mapping</li>
+    <li data-key="features.soilAnalysis.feature2">pH optimization</li>
+    <li data-key="features.soilAnalysis.feature3">Custom fertilizer blends</li>
+  </ul>
+</div>
+
+<!-- Weather Prediction -->
+          <div class="feature-card"
+     onclick="window.location.href='{{ url_for('weather_page') }}'"
+     role="link"
+     tabindex="0"
+     onkeydown="if(event.key==='Enter' || event.key===' ') window.location.href='{{ url_for('weather_page') }}';"
+     style="cursor:pointer;">
+  <div class="feature-icon"><i class="fas fa-cloud-sun"></i></div>
+  <h3 data-key="features.weatherPrediction.title">Weather Prediction</h3>
+  <p data-key="features.weatherPrediction.description">
+    Advanced weather forecasting with hyperlocal predictions to help you make informed farming decisions.
+  </p>
+  <ul class="feature-list">
+    <li data-key="features.weatherPrediction.feature1">5-day forecasts</li>
+    <li data-key="features.weatherPrediction.feature2">Rainfall predictions</li>
+    <li data-key="features.weatherPrediction.feature3">Temperature alerts</li>
+  </ul>
+</div>
+
+
+
+          <!-- Mobile App -->
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+            <h3 data-key="features.mobileApp.title">Mobile App</h3>
+            <p data-key="features.mobileApp.description">
+              Access all features on-the-go with our intuitive mobile application, available for iOS and Android.
+            </p>
+            <ul class="feature-list">
+              <li data-key="features.mobileApp.feature1">Offline capabilities</li>
+              <li data-key="features.mobileApp.feature2">Voice commands</li>
+              <li data-key="features.mobileApp.feature3">Real-time notifications</li>
+            </ul>
+          </div>
+
+          <!-- Multilingual Support -->
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-globe"></i></div>
+            <h3 data-key="features.multilingual.title">Multilingual Support</h3>
+            <p data-key="features.multilingual.description">
+              Available in 25+ languages with local farming knowledge and region-specific recommendations.
+            </p>
+            <ul class="feature-list">
+              <li data-key="features.multilingual.feature1">25+ languages</li>
+              <li data-key="features.multilingual.feature2">Local expertise</li>
+              <li data-key="features.multilingual.feature3">Cultural adaptation</li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Government Schemes for Farmers (India) -->
+<section id="schemes" class="schemes-section container mt-5 mb-5">
+  <div class="section-header mb-3">
+    <h2 class="section-title" style="font-size:1.6rem; font-weight:600;">Government Schemes for Farmers (India)</h2>
+    <p class="section-description text-muted" style="margin-top:6px;">
+      Latest central schemes & supports you may be eligible for. Click "View" for details or "Apply".
+    </p>
+  </div>
+
+  <div id="schemes-container" class="row g-3">
+    <div id="schemes-loading" class="col-12 text-muted">Loading schemes...</div>
+  </div>
+</section>
+
+<!-- Scheme Detail Modal (Bootstrap) -->
+<div class="modal fade" id="schemeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" style="border-radius:12px;">
+      <div class="modal-header">
+        <h5 class="modal-title" id="schemeModalTitle"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="schemeModalBody">
+        <!-- Filled by JS -->
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+    <!-- Services Section -->
+    <section class="services" id="services">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title" data-key="services.title">AI-Powered Agricultural Services</h2>
+          <p class="section-description" data-key="services.subtitle">
+            Comprehensive solutions designed to revolutionize your farming experience
+          </p>
+        </div>
+
+        <div class="services-list">
+          <div class="service-item">
+            <div class="service-content">
+              <div class="service-header">
+                <div class="service-icon"><i class="fas fa-sparkles"></i></div>
+                <div class="service-badge">Most Popular</div>
+              </div>
+              <h3 data-key="services.smartAdvisory.title">Smart Crop Advisory</h3>
+              <p data-key="services.smartAdvisory.description">
+                AI-driven recommendations for optimal planting, irrigation, and harvesting times based on real-time data analysis.
+              </p>
+              <div class="service-features">
+                <div class="feature-tag" data-key="services.smartAdvisory.feature1">Weather prediction</div>
+                <div class="feature-tag" data-key="services.smartAdvisory.feature2">Soil analysis</div>
+                <div class="feature-tag" data-key="services.smartAdvisory.feature3">Crop rotation planning</div>
+                <div class="feature-tag" data-key="services.smartAdvisory.feature4">Yield optimization</div>
+              </div>
+              <button class="btn btn-primary" data-key="services.learnMore">Learn More</button>
+            </div>
+            <div class="service-image">
+              <img src="https://images.unsplash.com/photo-1722119272044-fc49006131e0?auto=format&fit=crop&w=1080&q=80" alt="Smart Crop Advisory">
+            </div>
+          </div>
+
+          <div class="service-item service-reverse">
+            <div class="service-content">
+              <div class="service-header">
+                <div class="service-icon"><i class="fas fa-camera"></i></div>
+                <div class="service-badge">AI Vision</div>
+              </div>
+              <h3 data-key="services.diseaseDetection.title">Disease Detection</h3>
+              <p data-key="services.diseaseDetection.description">
+                Advanced computer vision technology to instantly identify plant diseases and pest infestations through image analysis.
+              </p>
+              <div class="service-features">
+                <div class="feature-tag" data-key="services.diseaseDetection.feature1">Real-time scanning</div>
+                <div class="feature-tag" data-key="services.diseaseDetection.feature2">95% accuracy rate</div>
+                <div class="feature-tag" data-key="services.diseaseDetection.feature3">Treatment recommendations</div>
+                <div class="feature-tag" data-key="services.diseaseDetection.feature4">Progress tracking</div>
+              </div>
+              <button class="btn btn-primary" data-key="services.learnMore">Learn More</button>
+            </div>
+            <div class="service-image">
+              <img src="https://images.unsplash.com/photo-1667579931780-41d610a63488?auto=format&fit=crop&w=1080&q=80" alt="Disease Detection">
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials" id="testimonials">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title" data-key="testimonials.title">Trusted by Farmers Worldwide</h2>
+          <p class="section-description" data-key="testimonials.subtitle">
+            See how AgroSathi is transforming agriculture across the globe
+          </p>
+        </div>
+
+        <div class="testimonials-grid">
+          <div class="testimonial-card">
+            <div class="testimonial-rating">
+              <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+            </div>
+            <blockquote data-key="testimonials.maria.quote">
+              "AgroSathi helped me increase my coffee yield by 40% while reducing fertilizer costs. The pest detection feature saved my entire crop last season."
+            </blockquote>
+            <div class="testimonial-author">
+              <div class="author-avatar">MS</div>
+              <div class="author-info">
+                <h4 data-key="testimonials.maria.name">Maria Santos</h4>
+                <p data-key="testimonials.maria.title">Coffee Farmer</p>
+                <p data-key="testimonials.maria.location">São Paulo, Brazil</p>
+              </div>
+              <div class="improvement-badge">+40% Yield</div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="testimonial-rating">
+              <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+            </div>
+            <blockquote data-key="testimonials.raj.quote">
+              "The multilingual support made it easy for me to use. The AI recommendations are spot-on and have helped me optimize water usage significantly."
+            </blockquote>
+            <div class="testimonial-author">
+              <div class="author-avatar">RP</div>
+              <div class="author-info">
+                <h4 data-key="testimonials.raj.name">Raj Patel</h4>
+                <p data-key="testimonials.raj.title">Cotton Farmer</p>
+                <p data-key="testimonials.raj.location">Gujarat, India</p>
+              </div>
+              <div class="improvement-badge">-30% Water Usage</div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="testimonial-rating">
+              <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+            </div>
+            <blockquote data-key="testimonials.john.quote">
+              "I was skeptical about AI in farming, but AgroSathi proved me wrong. The soil analysis and fertilizer recommendations are incredibly accurate."
+            </blockquote>
+            <div class="testimonial-author">
+              <div class="author-avatar">JM</div>
+              <div class="author-info">
+                <h4 data-key="testimonials.john.name">John Mitchell</h4>
+                <p data-key="testimonials.john.title">Corn Farmer</p>
+                <p data-key="testimonials.john.location">Iowa, USA</p>
+              </div>
+              <div class="improvement-badge">+25% Efficiency</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section class="contact" id="contact">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title" data-key="contact.title">Get Started with AgroSathi</h2>
+          <p class="section-description" data-key="contact.subtitle">Ready to transform your farming? Connect with our team of agricultural experts.</p>
+        </div>
+
+        <div class="contact-content">
+          <div class="contact-form-section">
+            <div class="contact-form-header">
+              <h3 data-key="contact.form.title">Start Your Free Trial</h3>
+              <p data-key="contact.form.description">Join thousands of farmers already using AgroSathi to optimize their operations.</p>
+              <div class="trial-badge">Free Trial</div>
+            </div>
+
+            <form class="contact-form" id="contact-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="name" data-key="contact.form.nameLabel">Full Name</label>
+                  <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                  <label for="email" data-key="contact.form.emailLabel">Email Address</label>
+                  <input type="email" id="email" name="email" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="company" data-key="contact.form.companyLabel">Farm/Company Name</label>
+                <input type="text" id="company" name="company">
+              </div>
+
+              <div class="form-group">
+                <label for="message" data-key="contact.form.messageLabel">Tell us about your farming needs</label>
+                <textarea id="message" name="message" rows="4" required></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-lg btn-full">
+                <i class="fas fa-paper-plane"></i> <span data-key="contact.form.submitButton">Start Free Trial</span>
+              </button>
+            </form>
+          </div>
+
+          <div class="contact-info-section">
+            <div class="contact-info-card">
+              <h4 data-key="contact.info.title">Contact Information</h4>
+              <div class="contact-details">
+                <div class="contact-item"><i class="fas fa-phone"></i><span>+1 (555) 123-4567</span></div>
+                <div class="contact-item"><i class="fas fa-envelope"></i><span id="contact-email">hello@AgroSathi.com</span></div>
+                <div class="contact-item"><i class="fas fa-map-marker-alt"></i><span>123 AgriTech Plaza, CA 90210</span></div>
+                <div class="contact-item"><i class="fas fa-clock"></i><span data-key="contact.info.hours">24/7 Support Available</span></div>
+              </div>
+            </div>
+
+            <div class="contact-features">
+              <div class="contact-feature">
+                <div class="feature-icon"><i class="fas fa-comments"></i></div>
+                <div class="feature-content">
+                  <h5 data-key="contact.features.consultation.title">Expert Consultation</h5>
+                  <p data-key="contact.features.consultation.description">Free 30-minute consultation with agricultural specialists</p>
+                </div>
+              </div>
+
+              <div class="contact-feature">
+                <div class="feature-icon"><i class="fas fa-users"></i></div>
+                <div class="feature-content">
+                  <h5 data-key="contact.features.community.title">Community Access</h5>
+                  <p data-key="contact.features.community.description">Join our global community of 500K+ farmers</p>
+                </div>
+              </div>
+
+              <div class="contact-feature">
+                <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                <div class="feature-content">
+                  <h5 data-key="contact.features.security.title">Data Security</h5>
+                  <p data-key="contact.features.security.description">Enterprise-grade security for your farm data</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <h3>🌱 AgroSathi</h3>
+          <p data-key="footer.description">Revolutionizing agriculture with AI-powered solutions for smarter, more sustainable farming.</p>
+          <div class="social-links">
+            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+
+        <div class="footer-links">
+          <div class="footer-column">
+            <h4 data-key="footer.product.title">Product</h4>
+            <ul>
+              <li><a href="#" data-key="footer.product.advisory">Crop Advisory</a></li>
+              <li><a href="#" data-key="footer.product.detection">Disease Detection</a></li>
+              <li><a href="#" data-key="footer.product.fertilizer">Fertilizer Guidance</a></li>
+              <li><a href="#" data-key="footer.product.weather">Weather Insights</a></li>
+              <li><a href="#" data-key="footer.product.mobile">Mobile App</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-column">
+            <h4 data-key="footer.company.title">Company</h4>
+            <ul>
+              <li><a href="#" data-key="footer.company.about">About Us</a></li>
+              <li><a href="#" data-key="footer.company.careers">Careers</a></li>
+              <li><a href="#" data-key="footer.company.press">Press</a></li>
+              <li><a href="#" data-key="footer.company.blog">Blog</a></li>
+              <li><a href="#" data-key="footer.company.contact">Contact</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-column">
+            <h4 data-key="footer.support.title">Support</h4>
+            <ul>
+              <li><a href="#" data-key="footer.support.help">Help Center</a></li>
+              <li><a href="#" data-key="footer.support.docs">Documentation</a></li>
+              <li><a href="#" data-key="footer.support.api">API Reference</a></li>
+              <li><a href="#" data-key="footer.support.community">Community</a></li>
+              <li><a href="#" data-key="footer.support.status">Status</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="footer-newsletter">
+          <h4 data-key="footer.newsletter.title">Stay Updated</h4>
+          <p data-key="footer.newsletter.description">Get the latest agriculture insights and product updates.</p>
+          <form class="newsletter-form">
+            <input type="email" data-placeholder-key="footer.newsletter.placeholder" required>
+            <button type="submit" class="btn btn-primary" data-key="footer.newsletter.button">Subscribe</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p data-key="footer.copyright">© 2025 AgroSathi. All rights reserved.</p>
+        <div class="footer-legal">
+          <a href="#" data-key="footer.legal.privacy">Privacy Policy</a>
+          <a href="#" data-key="footer.legal.terms">Terms of Service</a>
+          <a href="#" data-key="footer.legal.cookies">Cookies</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+
+ 
+
+
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  // graceful references - prefer separate emoji+label if present, else fallback to single element
+  const selector = document.querySelector('.language-selector');
+  const btn = document.getElementById('language-btn');
+  const dropdown = document.getElementById('language-dropdown');
+  const combined = document.getElementById('current-language'); // your original single span
+  const emoji = document.getElementById('current-language-emoji');
+  const label = document.getElementById('current-language-label');
+
+  if (!selector || !btn || !dropdown) {
+    console.warn('Language selector elements missing; dropdown disabled.');
+    return;
+  }
+
+  // small maps for visuals
+  const LANG_EMOJI = { en:'🇺🇸', hi:'🇮🇳', kn:'🇮🇳', es:'🇪🇸', fr:'🇫🇷', pt:'🇧🇷' };
+  const LANG_LABEL = { en:'EN', hi:'हिन्दी', kn:'ಕನ್ನಡ', es:'ES', fr:'FR', pt:'PT' };
+
+  // helper to set UI text (tries emoji+label first, then combined fallback)
+  function setCurrentUI(code, text) {
+    const em = LANG_EMOJI[code] || '🏳️';
+    const lbl = LANG_LABEL[code] || (text || code.toUpperCase());
+    if (emoji && label) {
+      emoji.textContent = em;
+      label.textContent = lbl;
+    } else if (combined) {
+      combined.textContent = `${em} ${lbl}`;
+    }
+  }
+
+  // read server-injected lang if present (Jinja)
+  const SERVER_LANG = "{{ CURRENT_LANG if CURRENT_LANG is defined else 'en' }}";
+  setCurrentUI(SERVER_LANG || 'en');
+
+  // toggle dropdown visible state
+  function openDropdown(){ dropdown.style.display = 'block'; btn.setAttribute('aria-expanded','true'); }
+  function closeDropdown(){ dropdown.style.display = 'none'; btn.setAttribute('aria-expanded','false'); }
+  function toggleDropdown(e){ e && e.stopPropagation(); dropdown.style.display === 'block' ? closeDropdown() : openDropdown(); }
+
+  // attach events (avoid double-registering)
+  btn.removeEventListener('click', toggleDropdown);
+  btn.addEventListener('click', (e) => toggleDropdown(e));
+  btn.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleDropdown(e); }
+    if (e.key === 'Escape') closeDropdown();
+  });
+
+  // option click handler
+  dropdown.querySelectorAll('.language-option').forEach(opt => {
+    // remove any previous handlers for safety
+    opt.replaceWith(opt.cloneNode(true));
+  });
+
+  // re-query after replace (ensures single handler)
+  dropdown.querySelectorAll('.language-option').forEach(opt => {
+    opt.addEventListener('click', (ev) => {
+      const code = opt.getAttribute('data-lang') || '';
+      setCurrentUI(code, opt.innerText.trim());
+      closeDropdown();
+
+      // uncomment this if you want to actually change language on server
+      // window.location.href = '/set_language/' + encodeURIComponent(code);
+    });
+  });
+
+  // close when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!selector.contains(e.target)) closeDropdown();
+  });
+
+  // close on escape
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDropdown(); });
+
+  // avoid immediate close when clicking inside dropdown
+  dropdown.addEventListener('click', (e) => e.stopPropagation());
+});
+</script>
+
+<script>
+(function(){
+  // safe HTML escape helpers
+  function esc(s){ if(s===null||s===undefined) return ''; return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function escAttr(s){ return esc(s).replace(/"/g,'&quot;'); }
+
+  async function loadSchemes(){
+    const container = document.getElementById('schemes-container');
+    const loading = document.getElementById('schemes-loading');
+    if(!container) return;
+    try{
+      const res = await fetch('/api/schemes');
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const data = await res.json();
+      const schemes = data.schemes || [];
+      container.innerHTML = ''; // clear
+
+      if(schemes.length === 0){
+        container.innerHTML = '<div class="col-12 text-muted">No schemes available right now.</div>';
+        return;
+      }
+
+      schemes.forEach(s => {
+        // card markup matches your theme: rounded card with icon-like left column
+        const col = document.createElement('div');
+        col.className = 'col-md-4';
+
+        col.innerHTML = `
+          <div class="feature-card" style="background:#fff;border-radius:12px;padding:18px;height:100%;display:flex;flex-direction:column;box-shadow:0 6px 20px rgba(2,6,23,0.06);">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:46px;height:46px;border-radius:10px;background:#e9f7ef;display:flex;align-items:center;justify-content:center;font-size:20px;">
+                <i class="fas fa-hand-holding-usd" style="color:#1f9b4a"></i>
+              </div>
+              <div style="flex:1">
+                <h5 style="margin:0;font-size:1rem;font-weight:600;">${esc(s.title)}</h5>
+                <div style="color:#6b7280;font-size:0.9rem;margin-top:4px">${esc(s.short)}</div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;flex:1;color:#374151;font-size:0.92rem;">
+              <p style="margin:0 0 8px 0;color: #475569;">${esc((s.states && s.states.join(', ')) || '')}</p>
+              <p style="margin:0;color:#6b7280;font-size:0.86rem">${esc(s.description ? (s.description.length>180 ? s.description.slice(0,177)+'...' : s.description) : '')}</p>
+            </div>
+
+            <div style="margin-top:14px;display:flex;gap:8px;">
+              <button class="btn btn-outline-primary btn-sm view-scheme" data-id="${escAttr(s.id)}">View</button>
+              <a class="btn btn-success btn-sm" href="${escAttr(s.apply_url || '#')}" target="_blank" rel="noopener">Apply</a>
+            </div>
+          </div>
+        `.trim();
+
+        container.appendChild(col);
+      });
+
+      // wire up view buttons
+      document.querySelectorAll('.view-scheme').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const id = btn.getAttribute('data-id');
+          const scheme = schemes.find(x=>x.id===id);
+          if(!scheme) return;
+          // populate modal
+          document.getElementById('schemeModalTitle').textContent = scheme.title || '';
+          document.getElementById('schemeModalBody').innerHTML = `
+            <p style="color:#374151">${esc(scheme.description || '')}</p>
+            <dl style="margin-top:8px;color:#6b7280">
+              <dt style="font-weight:600">Category</dt><dd>${esc(scheme.category || '')}</dd>
+              <dt style="font-weight:600">Eligible States</dt><dd>${esc((scheme.states||[]).join(', ') || 'All')}</dd>
+            </dl>
+          `;
+          const applyBtn = document.getElementById('schemeApplyBtn');
+          applyBtn.href = scheme.apply_url || '#';
+          // show bootstrap modal
+          const modalEl = document.getElementById('schemeModal');
+          if(typeof bootstrap !== 'undefined'){
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+          } else {
+            alert(scheme.title + "\n\n" + (scheme.description||''));
+          }
+        });
+      });
+
+    }catch(err){
+      console.error('Failed to load schemes', err);
+      if(container) container.innerHTML = '<div class="col-12 text-danger">Failed to load schemes.</div>';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', loadSchemes);
+})();
+</script>
+
+
+  <!-- Keep your external app script last -->
+  <!-- <script src="{{ url_for('static', filename='script.js') }}"></script> -->
+</body>
+</html>

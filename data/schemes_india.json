@@ -1,0 +1,38 @@
+[
+  {
+    "id": "pm-kisan",
+    "title": "Pradhan Mantri Kisan Samman Nidhi (PM-KISAN)",
+    "short": "Direct income support to small & marginal farmers",
+    "description": "Provides income support of ₹6,000 per year to eligible farmers in three equal instalments. Beneficiaries must register and provide land details to avail benefits.",
+    "apply_url": "https://pmkisan.gov.in",
+    "category": "income_support",
+    "states": ["All"]
+  },
+  {
+    "id": "soil-health-card",
+    "title": "Soil Health Card Scheme",
+    "short": "Soil testing & nutrient recommendations",
+    "description": "Provides periodic soil testing, a Soil Health Card with nutrient status, and fertilizer recommendations to optimize input use and increase yield.",
+    "apply_url": "https://soilhealth.dac.gov.in",
+    "category": "soil",
+    "states": ["All"]
+  },
+  {
+    "id": "kisan-credit-card",
+    "title": "Kisan Credit Card (KCC)",
+    "short": "Affordable credit for crop & allied inputs",
+    "description": "Provides short-term credit to farmers for crop production, post-harvest expenses, and working capital. Offers flexible repayment and lower interest compared to informal credit.",
+    "apply_url": "https://www.pmkisan.gov.in/kcc", 
+    "category": "credit",
+    "states": ["All"]
+  },
+  {
+    "id": "pmfby",
+    "title": "Pradhan Mantri Fasal Bima Yojana (PMFBY)",
+    "short": "Crop insurance to reduce risk from loss",
+    "description": "Comprehensive crop insurance scheme that gives financial support to farmers suffering crop loss/damage from natural calamities, pests, and disease.",
+    "apply_url": "https://pmfby.gov.in",
+    "category": "insurance",
+    "states": ["All"]
+  }
+]

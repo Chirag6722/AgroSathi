@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="{{ CURRENT_LANG or 'en' }}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Soil Analysis | AgriAI</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <style>
+      body {
+        background-color: #f8fafc;
+      }
+      .analysis-card {
+        max-width: 950px;
+        margin: 60px auto;
+        background: white;
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+      .form-control:focus {
+        box-shadow: none;
+        border-color: #198754;
+      }
+      .results {
+        display: none;
+        margin-top: 25px;
+      }
+      .deficit-table td,
+      .deficit-table th {
+        text-align: center;
+      }
+      .muted-note {
+        color: #6c757d;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <a href="{{ url_for('home') }}" class="btn btn-outline-secondary mt-4">
+        ← Back to Home
+      </a>
+
+      <div class="analysis-card mt-4">
+        <h3 class="text-success fw-bold mb-3">
+          <i class="fas fa-seedling"></i> Soil Analysis
+        </h3>
+        <p class="text-muted">
+          Enter soil nutrient values (ppm or kg/ha) and pH to get AI-based soil
+          fertility recommendations.
+        </p>
+
+        <form id="soilForm" class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label">Nitrogen (N)</label>
+            <input
+              type="number"
+              step="any"
+              id="n"
+              class="form-control"
+              placeholder="e.g., 35"
+              required
+            />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Phosphorus (P)</label>
+            <input
+              type="number"
+              step="any"
+              id="p"
+              class="form-control"
+              placeholder="e.g., 12"
+              required
+            />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Potassium (K)</label>
+            <input
+              type="number"
+              step="any"
+              id="k"
+              class="form-control"
+              placeholder="e.g., 90"
+              required
+            />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Soil pH</label>
+            <input
+              type="number"
+              step="0.1"
+              id="ph"
+              class="form-control"
+              placeholder="e.g., 6.5"
+              required
+            />
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Moisture (%)</label>
+            <input
+              type="number"
+              step="any"
+              id="moisture"
+              class="form-control"
+              placeholder="e.g., 30"
+            />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Area (ha)</label>
+            <input
+              type="number"
+              step="any"
+              id="area"
+              class="form-control"
+              placeholder="e.g., 1"
+              value="1"
+            />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Units</label>
+            <select id="units" class="form-select">
+              <option value="ppm" selected>ppm</option>
+              <option value="kg/ha">kg/ha</option>
+            </select>
+          </div>
+
+          <div class="col-12 d-flex gap-2 mt-3">
+            <button
+              type="button"
+              class="btn btn-success"
+              id="analyzeBtn"
+              style="min-width: 160px"
+            >
+              <span id="btnSpinner" style="display: none">
+                <span
+                  class="spinner-border spinner-border-sm"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+              </span>
+              Analyze Soil
+            </button>
+            <button type="reset" class="btn btn-secondary" id="resetBtn">
+              Reset
+            </button>
+          </div>
+        </form>
+
+        <div class="results" id="results">
+          <hr />
+          <h5 class="text-success fw-semibold mb-3">Results</h5>
+          <div class="row">
+            <div class="col-md-3">
+              <strong>Source:</strong>
+              <div id="resSource">—</div>
+            </div>
+            <div class="col-md-3">
+              <strong>Predicted Class:</strong>
+              <div id="resClass">—</div>
+            </div>
+            <div class="col-md-6">
+              <strong>Probabilities:</strong>
+              <ul id="resProbs" class="mb-0"></ul>
+            </div>
+          </div>
+
+          <hr />
+          <div class="row">
+            <div class="col-md-7">
+              <h6>Soil Fertility: <span id="resFertility"></span></h6>
+              <ul id="resSuggestions"></ul>
+            </div>
+            <div class="col-md-5">
+              <h6>Deficits (kg/ha)</h6>
+              <table class="table table-sm table-borderless deficit-table">
+                <thead>
+                  <tr>
+                    <th>N</th>
+                    <th>P</th>
+                    <th>K</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td id="defN">—</td>
+                    <td id="defP">—</td>
+                    <td id="defK">—</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <hr />
+          <div>
+            <h6>pH Advice</h6>
+            <p id="resPhStatus" class="mb-1"></p>
+            <p id="resPhAdvice" class="muted-note mb-0"></p>
+          </div>
+
+          <p class="muted-note mt-3">
+            AI-based analysis when model is available; otherwise uses
+            rule-based fallback.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const analyzeBtn = document.getElementById("analyzeBtn");
+      const spinner = document.getElementById("btnSpinner");
+      const resultsDiv = document.getElementById("results");
+
+      function showLoading(on = true) {
+        spinner.style.display = on ? "inline-block" : "none";
+        analyzeBtn.disabled = on;
+      }
+
+      analyzeBtn.addEventListener("click", async () => {
+        showLoading(true);
+        resultsDiv.style.display = "none";
+
+        const payload = {
+          N: parseFloat(document.getElementById("n").value || 0),
+          P: parseFloat(document.getElementById("p").value || 0),
+          K: parseFloat(document.getElementById("k").value || 0),
+          ph: parseFloat(document.getElementById("ph").value || 0),
+          moisture: parseFloat(document.getElementById("moisture").value || 0),
+          area_ha: parseFloat(document.getElementById("area").value || 1),
+          units: document.getElementById("units").value,
+        };
+
+        try {
+          const resp = await fetch("/api/soil-analysis", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          if (!resp.ok) {
+            alert("Server error: " + resp.status);
+            showLoading(false);
+            return;
+          }
+
+          const data = await resp.json();
+          document.getElementById("resSource").textContent =
+            data.source || "—";
+          document.getElementById("resClass").textContent =
+            data.predicted_class || "—";
+
+          // probabilities
+const probsList = document.getElementById("resProbs");
+probsList.innerHTML = "";
+const probs = data.probabilities || {};
+for (const [k, v] of Object.entries(probs)) {
+  const val = Number(v);
+  let pct;
+  if (isNaN(val)) {
+    pct = v;
+  } else {
+    // if backend gave e.g. 0.85 -> show 85.0%. If backend gave 85 -> show 85.0%
+    pct = (val <= 1 ? val * 100 : val).toFixed(1) + "%";
+  }
+  const li = document.createElement("li");
+  li.textContent = `${k}: ${pct}`;
+  probsList.appendChild(li);
+}
+
+
+          // deficits
+          document.getElementById("defN").textContent =
+            data.deficits?.N?.deficit_kg_per_ha ?? "—";
+          document.getElementById("defP").textContent =
+            data.deficits?.P?.deficit_kg_per_ha ?? "—";
+          document.getElementById("defK").textContent =
+            data.deficits?.K?.deficit_kg_per_ha ?? "—";
+
+          // fertility
+          document.getElementById("resFertility").textContent =
+            data.predicted_class || "—";
+
+          // suggestions
+          const sugUL = document.getElementById("resSuggestions");
+          sugUL.innerHTML = "";
+          (data.suggestions || []).forEach((s) => {
+            const li = document.createElement("li");
+            li.textContent = `${s.nutrient}: apply ${s.suggest_apply_kg_per_ha} kg/ha (${s.suggest_apply_total_kg_for_area} kg total) — ${s.note}`;
+            sugUL.appendChild(li);
+          });
+
+          // pH
+          document.getElementById("resPhStatus").textContent =
+            data.ph_advice?.status || "";
+          document.getElementById("resPhAdvice").textContent =
+            data.ph_advice?.advice || "";
+
+          resultsDiv.style.display = "block";
+        } catch (err) {
+          console.error(err);
+          alert("Failed to analyze soil: " + err.message);
+        } finally {
+          showLoading(false);
+        }
+      });
+
+      document.getElementById("resetBtn").addEventListener("click", () => {
+        resultsDiv.style.display = "none";
+      });
+    </script>
+  </body>
+</html>
