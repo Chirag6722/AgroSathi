@@ -19,9 +19,21 @@ from torchvision import transforms, models
 from flask import session, redirect, request, url_for
 from dotenv import load_dotenv
 load_dotenv()      # loads .env into environment variables
+import boto3
+from botocore.exceptions import ClientError
 
 
-
+def download_model_from_s3(bucket, key, local_path):
+    s3 = boto3.client('s3',
+                      aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
+                      aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'))
+    try:
+        s3.download_file(bucket, key, local_path)
+        print("Downloaded model to", local_path)
+        return True
+    except ClientError as e:
+        print("S3 download failed:", e)
+        return False
 
 # ---------------- App & Babel config ----------------
 app = Flask(__name__)
