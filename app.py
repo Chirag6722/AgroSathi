@@ -19,8 +19,8 @@ from torchvision import transforms, models
 from flask import session, redirect, request, url_for
 from dotenv import load_dotenv
 load_dotenv()      # loads .env into environment variables
-import boto3
-from botocore.exceptions import ClientError
+
+
 
 
 def download_model_from_s3(bucket, key, local_path):
